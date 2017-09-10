@@ -2,20 +2,38 @@ from bs4 import BeautifulSoup
 from multiprocessing import Pool
 import requests, pymongo,time, random, threading
 
-channels_count = 0
+channels_count = 0  #用于监控整个频道的完成情况
+
+#从http://cn-proxy.com/获取几个较好的代理切换使用
+proxy_list = [
+    '111.13.7.42:81',
+    '121.40.199.105:80',
+    '121.40.213.161:80',
+    '114.215.102.168:8081',
+    '122.49.35.168:33128'
+]
+
+proxies_ip = random.choice(proxy_list)
+proxies = {'http' : proxies_ip}
+
+headers = {
+    'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36',
+    'Connection':'keep-active'
+}
+
 
 #获取所有二手商品频道
 def get_channels():
     url_host = 'http://wh.ganji.com'
-    web_data = requests.get(url_host + '/wu')
+    web_data = requests.get(url_host + '/wu', headers=headers, proxies=proxies)
     soup = BeautifulSoup(web_data.text, 'lxml')
     channels = [url_host + i.get('href') for i in soup.select('#wrapper div.main dd a')]
     return channels
 
 #获取某个二手商品频道的某个页面下的所有url
 def get_pg_urls(url):
-    time.sleep(random.randint(2,3))
-    web_data = requests.get(url)
+    #time.sleep(random.randint(1,3))
+    web_data = requests.get(url, headers=headers, proxies=proxies)
     soup = BeautifulSoup(web_data.text, 'lxml')
     if len(soup.select('div.noinfo')) != 0:
         print('fail to get this page...')
@@ -31,14 +49,14 @@ def get_pg_urls(url):
 def get_channel_urls(channel_url, pg_num=100):
     global channels_count
     for i in range(1, pg_num + 1):
-        time.sleep(random.randint(2, 3))
+        # time.sleep(random.randint(1, 3))
         get_pg_urls(channel_url + 'o' + str(i))
     channels_count += 1
     print('done :%s the %dth channel' % (channel_url, channels_count))
 
 #获取某个详情帖子的信息
 def get_detail_data(url):
-    web_data = requests.get(url)
+    web_data = requests.get(url,  headers=headers, proxies=proxies)
     soup = BeautifulSoup(web_data.text, 'lxml')
 
     title = soup.select('h1.info_titile')[0].get_text()
@@ -53,13 +71,6 @@ def get_detail_data(url):
         'views':views
     })
 
-#没两秒监控获取数据情况
-def counter():
-    while True:
-        print('%d url fetched.' % url_collection.find().count())
-        print('%d detail data fetched.' % data_collection.find().count())
-        time.sleep(2)
-
 
 conn = pymongo.MongoClient('localhost', 27017)
 ganji_db = conn['ganji']
@@ -67,13 +78,13 @@ url_collection = ganji_db['url']
 data_collection = ganji_db['data']
 
 if __name__ == '__main__':
-    spy = threading.Thread(target=counter, daemon=True)
-    spy.start()
 
     url_pool = Pool()
     data_pool = Pool()
 
     channels = get_channels()
-    url_pool.map(get_channel_urls, channels)
+    url_pool.map(get_channel_urls, channels)    #先获取所有的详情页url
 
     data_pool.map(get_detail_data, [i['url'] for i in url_collection.find()])
+    #根据获取的url逐一获取信息
+
