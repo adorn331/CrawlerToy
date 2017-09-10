@@ -6,6 +6,6 @@ def monitor():
     while True:
         print('%d url fetched.' % url_collection.find().count())
         print('%d detail data fetched.' % data_collection.find().count())
-        time.sleep(8)   #8秒监控一下获取数据情况
+        time.sleep(10)   #10秒监控一下获取数据情况
 
 monitor()
