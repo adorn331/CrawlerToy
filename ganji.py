@@ -14,7 +14,7 @@ def get_channels():
 
 #获取某个二手商品频道的某个页面下的所有url
 def get_pg_urls(url):
-    time.sleep(random.randint(1,3))
+    time.sleep(random.randint(2,3))
     web_data = requests.get(url)
     soup = BeautifulSoup(web_data.text, 'lxml')
     if len(soup.select('div.noinfo')) != 0:
@@ -31,7 +31,7 @@ def get_pg_urls(url):
 def get_channel_urls(channel_url, pg_num=100):
     global channels_count
     for i in range(1, pg_num + 1):
-        time.sleep(random.randint(1, 3))
+        time.sleep(random.randint(2, 3))
         get_pg_urls(channel_url + 'o' + str(i))
     channels_count += 1
     print('done :%s the %dth channel' % (channel_url, channels_count))
