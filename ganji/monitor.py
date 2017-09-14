@@ -1,7 +1,7 @@
 from main import url_collection, data_collection
 import time, datetime
 
-#监控数据库中获取数据情况
+##监控数据库中获取数据情况
 def monitor():
     while True:
         print('time:', datetime.datetime.now())
