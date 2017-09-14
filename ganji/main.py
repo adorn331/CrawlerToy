@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from multiprocessing import Pool
 import requests, pymongo,time, random, threading
 
-#从http://cn-proxy.com/获取几个较好的代理切换使用
+##从http://cn-proxy.com/获取几个较好的代理切换使用
 proxy_list = [
     '101.200.45.131:3128',
     '121.40.199.105:80',
