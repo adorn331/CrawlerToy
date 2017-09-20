@@ -1,5 +1,5 @@
-#各个地区总帖子数前20名柱状图
-import pymongo
+#统计自己爬的各个地区总帖子数前20名柱状图
+import pymongo, charts
 
 conn = pymongo.MongoClient('localhost', 27017)
 ganji_db = conn['ganji']
